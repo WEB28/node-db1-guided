@@ -54,8 +54,26 @@ router.post('/', (req, res) => {
         })
 });
 
-router.put('/:id', (req, res) => {
+//PUT vs PATCH
+// PUT --> pass the whole object and it overrides what you have on the database
+// PATCH --> you have part of the data and you only want to change the title for example
+// Most companies use a PUT
 
+router.patch('/:id', (req, res) => {
+    const changes = req.body;
+    const { id } = req.params;
+
+    //update posts set titles = 'new title' where id = 5;
+    db('posts')
+        .where({ id })
+        .update(changes)
+        .then(count => {
+            if(count > 0) {
+                res.status(200).json({ message: 'update successful'})
+            } else {
+                res.status(404).json({message: 'no posts by that id found'})
+            }
+        })
 });
 
 router.delete('/:id', (req, res) => {
