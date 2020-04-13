@@ -19,7 +19,11 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     // read http://knexjs.org/#Builder-where
-    db('posts').where()
+    db('posts')
+        .where({ id: req.params.id })
+        // option 2 --> column --> oprator --> id
+        // .where( 'id', '=', req.params.id )
+        .first()
         .then(posts => {
             res.status(200).json({ data: posts })
         })
@@ -30,7 +34,24 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-
+    const postData = req.body;
+    
+    db('posts')
+        // second argument of 'id' guarantees that you'll get the id back when using postgres
+        .insert(postData, 'id')
+        .then(ids => {
+            const id = ids[0]
+            db('posts')
+                .where({ id })
+                .first()
+                .then( post => {
+                    res.status(200).json({ data: post })
+                });
+        })
+        .catch(err => {
+            console.log(error);
+            res.status(500).json({ error: error.message});
+        })
 });
 
 router.put('/:id', (req, res) => {
